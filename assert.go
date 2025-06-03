@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-type msg interface {
+type Message interface {
 	String() string
 }
 
@@ -28,7 +28,7 @@ func Assert(condition bool, message any) {
 		panic("assert failed: " + e.Error())
 	}
 
-	m, ok := message.(msg)
+	m, ok := message.(Message)
 	if ok {
 		panic("assert failed: " + m.String())
 	}
@@ -38,11 +38,31 @@ func Assert(condition bool, message any) {
 
 }
 
-// Assert fot testing
+// Assert for testing
 func AssertT(t *testing.T, condition bool, message any) {
 	if condition {
 		return
 	}
 
 	t.Error(message)
+}
+
+// Takes any sets of arguments where the last one must be of type error. If error is not nil it panics
+func Must(args ...any) {
+	if len(args) <= 0 {
+		panic("No arguments passed to the function")
+	}
+
+	e := args[len(args)-1]
+
+	evalue, ok := e.(error)
+	if !ok {
+		panic("last argument is not of error type")
+	}
+
+	if evalue == nil {
+		return
+	}
+
+	panic(evalue)
 }
