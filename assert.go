@@ -48,12 +48,16 @@ func AssertT(t *testing.T, condition bool, message any) {
 }
 
 // Takes any sets of arguments where the last one must be of type error. If error is not nil it panics
-func Must(args ...any) {
+func Must(args ...any) []any {
 	if len(args) <= 0 {
 		panic("No arguments passed to the function")
 	}
 
 	e := args[len(args)-1]
+
+	if args[len(args)-1] == nil {
+		return args[:len(args)-1]
+	}
 
 	evalue, ok := e.(error)
 	if !ok {
@@ -61,7 +65,7 @@ func Must(args ...any) {
 	}
 
 	if evalue == nil {
-		return
+		return args[:len(args)-1]
 	}
 
 	panic(evalue)
