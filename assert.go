@@ -4,6 +4,7 @@ Simple assertion package
 package assert
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 )
@@ -12,7 +13,7 @@ type Message interface {
 	String() string
 }
 
-// General assert on condition
+// Assert general assert on condition
 func Assert(condition bool, message any) {
 	if condition {
 		return
@@ -35,10 +36,33 @@ func Assert(condition bool, message any) {
 
 	fmt.Println("assert failed unable to decode message paramter panic with raw value")
 	panic(message)
-
 }
 
-// Assert for testing
+// AssertOrReturn assert the condition or returns the error
+func AssertOrReturn(condition bool, message any) error {
+	if condition {
+		return nil
+	}
+
+	s, ok := message.(string)
+	if ok {
+		return errors.New(s)
+	}
+
+	e, ok := message.(error)
+	if ok {
+		return e
+	}
+
+	m, ok := message.(Message)
+	if ok {
+		return errors.New(m.String())
+	}
+
+	return fmt.Errorf("%s %+v", "unknow message type", message)
+}
+
+// AssertT for testing
 func AssertT(t *testing.T, condition bool, message any) {
 	if condition {
 		return
@@ -47,7 +71,7 @@ func AssertT(t *testing.T, condition bool, message any) {
 	t.Error(message)
 }
 
-// Takes any sets of arguments where the last one must be of type error. If error is not nil it panics
+// Must takes any sets of arguments where the last one must be of type error. If error is not nil it panics
 func Must(args ...any) []any {
 	if len(args) <= 0 {
 		panic("No arguments passed to the function")
